@@ -137,7 +137,8 @@ html, body {
 
 /* Button styling */
 .btn {
-    padding: 0.75rem 1.5rem;
+    height: 2.5rem;
+    padding: 0 1rem;
     border-radius: 0.75rem;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -203,7 +204,9 @@ html, body {
 }
 
 .btn-icon {
-    padding: 0.75rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
     border-radius: 0.75rem;
     background: #f7fafc;
     border: 2px solid #e2e8f0;
@@ -234,7 +237,7 @@ html, body {
 
 .controls-group {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
 }
 
