@@ -133,9 +133,19 @@ function stopAiPanelResize() {
 }
 
 // AI Chat functionality
-function addMessage(content, type) {
+function addMessage(content, type, animate = true) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `ai-message ${type}`;
+    messageDiv.className = 'ai-message';
+    
+    const messageContainer = document.createElement('div');
+    messageContainer.className = `message-container ${type}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `message-avatar ${type}`;
+    avatar.textContent = type === 'user' ? 'U' : 'AI';
+    
+    const bubble = document.createElement('div');
+    bubble.className = `message-bubble ${type}`;
     
     // Simple markdown-like formatting for AI responses
     if (type === 'assistant') {
@@ -145,14 +155,24 @@ function addMessage(content, type) {
         content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
         // Convert line breaks
         content = content.replace(/\n/g, '<br>');
-        messageDiv.innerHTML = content;
+        bubble.innerHTML = content;
     } else {
-        messageDiv.textContent = content;
+        bubble.textContent = content;
     }
     
-    const chatContainer = document.getElementById('copilot-chat');
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    messageContainer.appendChild(avatar);
+    messageContainer.appendChild(bubble);
+    messageDiv.appendChild(messageContainer);
+    
+    const aiMessages = document.getElementById('aiMessages');
+    aiMessages.appendChild(messageDiv);
+    
+    // Smooth scroll to bottom
+    setTimeout(() => {
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    }, 100);
+    
+    return messageDiv;
 }
 
 async function sendAiMessage() {
@@ -162,13 +182,38 @@ async function sendAiMessage() {
     addMessage(message, 'user');
     aiInput.value = '';
     
-    // Show loading indicator
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'ai-message assistant';
-    loadingDiv.textContent = 'Thinking...';
-    const chatContainer = document.getElementById('copilot-chat');
-    chatContainer.appendChild(loadingDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // Show typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-message';
+    
+    const typingContainer = document.createElement('div');
+    typingContainer.className = 'message-container assistant';
+    
+    const typingAvatar = document.createElement('div');
+    typingAvatar.className = 'message-avatar assistant';
+    typingAvatar.textContent = 'AI';
+    
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = `
+        <span>Thinking</span>
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    `;
+    
+    typingContainer.appendChild(typingAvatar);
+    typingContainer.appendChild(typingIndicator);
+    typingDiv.appendChild(typingContainer);
+    
+    const aiMessages = document.getElementById('aiMessages');
+    aiMessages.appendChild(typingDiv);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+    
+    // Disable send button
+    sendAiBtn.disabled = true;
     
     try {
         // Get current code and language
@@ -188,7 +233,7 @@ async function sendAiMessage() {
         const data = await response.json();
         
         // Remove loading message
-        chatContainer.removeChild(loadingDiv);
+        aiMessages.removeChild(typingDiv);
         
         if (data.error) {
             addMessage(`Error: ${data.error}`, 'assistant');
@@ -202,7 +247,7 @@ async function sendAiMessage() {
         aiInput.focus();
     } catch (error) {
         // Remove loading message
-        chatContainer.removeChild(loadingDiv);
+        aiMessages.removeChild(typingDiv);
         addMessage(`Network error: ${error.message}`, 'assistant');
         
         // Ensure input bar is visible and focused even on error
@@ -210,6 +255,9 @@ async function sendAiMessage() {
         sendAiBtn.style.display = 'block';
         aiInput.focus();
     }
+    
+    // Re-enable send button
+    sendAiBtn.disabled = false;
 }
 
 sendAiBtn.addEventListener('click', sendAiMessage);
@@ -266,6 +314,12 @@ document.getElementById('clearBtn').addEventListener('click', function () {
 // --- Dark/Light mode toggle ---
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
+
+// Load theme from localStorage
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+
 function setTheme(dark) {
     if (dark) {
         document.documentElement.classList.add('dark');
@@ -278,8 +332,9 @@ function setTheme(dark) {
     }
     localStorage.setItem('theme', dark ? 'dark' : 'light');
 }
-// Initial theme
-setTheme(localStorage.getItem('theme') === 'dark');
+
+// Set initial theme
+setTheme(initialTheme === 'dark');
 themeToggle.addEventListener('click', () => {
     setTheme(!document.documentElement.classList.contains('dark'));
 });
@@ -300,6 +355,18 @@ function showOutput(msg) {
 // Initialize AI panel on load
 document.addEventListener('DOMContentLoaded', () => {
     aiPanel.style.width = `${aiPanelWidth}px`;
+    
+    // Auto-resize textarea
+    const aiInput = document.getElementById('aiInput');
+    aiInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 128) + 'px';
+    });
+    
+    // Add welcome message
+    setTimeout(() => {
+        addMessage('Hello! I\'m your AI coding assistant. I can help you with your code, explain concepts, debug issues, and suggest improvements. What would you like to work on?', 'assistant');
+    }, 500);
 });
 
 // --- Fullscreen toggle functionality ---

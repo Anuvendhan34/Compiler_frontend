@@ -14,25 +14,27 @@
     <div class="split-container">
         <div class="main-content" id="mainContent">
             <div class="left-pane">
-                <div class="flex justify-between items-center mb-4">
-                    <h1 class="text-2xl font-bold dark:text-white">Ve's Compiler</h1>
-                    <select id="language" class="border rounded px-3 py-2 dark:bg-gray-700 dark:text-white">
+                <div class="header-container">
+                    <h1 class="header-title">Ve's Compiler</h1>
+                    <select id="language" class="language-selector">
                         <option value="python">Python</option>
                         <option value="c">C</option>
                         <option value="cpp">C++</option>
                         <option value="java">Java</option>
                     </select>
-                    <div class="flex gap-4 items-center">
-                        <button id="runBtn" class="bg-[#2C2C2C] text-[#00B775] px-6 py-2 rounded font-['Open_Sans',sans-serif] hover:bg-[#3A3A3A] transition-colors border-0 shadow-none">Run</button>
-                        <button id="clearBtn" class="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500 transition-colors">Clear Output</button>
-                        <button id="themeToggle" class="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="Toggle dark/light mode">
+                    <div class="controls-group">
+                        <button id="runBtn" class="btn btn-primary">
+                            ▶ Run
+                        </button>
+                        <button id="clearBtn" class="btn btn-secondary">Clear Output</button>
+                        <button id="themeToggle" class="btn-icon" title="Toggle dark/light mode">
                             <img id="themeIcon" src="assets/dark.png" alt="Theme" class="w-5 h-5">
                         </button>
-                        <button id="fullscreenToggle" class="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="Toggle fullscreen">
+                        <button id="fullscreenToggle" class="btn-icon" title="Toggle fullscreen">
                             <img id="fullscreenIcon" src="assets/maximize.png" alt="Fullscreen" class="w-5 h-5">
                         </button>
-                        <button id="copilotBtn" class="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="Open AI Assistant">
-                            <span class="copilot-icon">🤖</span>
+                        <button id="copilotBtn" class="btn-icon" title="Open AI Assistant">
+                            <span style="font-size: 1.25rem;">🤖</span>
                         </button>
                     </div>
                 </div>
@@ -44,13 +46,15 @@
             <div class="right-pane">
                 <div class="flex flex-col h-full">
                     <div class="mb-4 flex-grow flex flex-col">
-                        <label for="input" class="block font-semibold mb-1 dark:text-white">Input:</label>
-                        <textarea id="input" class="w-full border rounded px-3 py-2 dark:bg-gray-700 dark:text-white flex-grow" placeholder="Optional input for your program..."></textarea>
+                        <label for="input" class="block font-semibold mb-2 text-gray-700 dark:text-gray-200">Input:</label>
+                        <textarea id="input" class="flex-grow" placeholder="Optional input for your program..."></textarea>
                     </div>
                     <div class="flex-grow flex flex-col">
-                        <label class="block font-semibold mb-1 dark:text-white">Output:</label>
-                        <div id="spinner" class="hidden ml-2 w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <pre id="output" class="bg-black text-green-400 rounded p-3 flex-grow overflow-y-auto transition-colors"></pre>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="block font-semibold text-gray-700 dark:text-gray-200">Output:</label>
+                            <div id="spinner" class="hidden"></div>
+                        </div>
+                        <pre id="output" class="flex-grow overflow-y-auto"></pre>
                     </div>
                 </div>
             </div>
@@ -59,14 +63,19 @@
         <!-- AI Assistant Panel -->
         <div id="aiPanel" class="ai-panel">
             <div class="ai-panel-header">
-                <h3 class="text-lg font-semibold dark:text-white">AI Assistant</h3>
+                <h3 class="ai-panel-title">
+                    <span>🤖</span>
+                    AI Assistant
+                </h3>
                 <button id="closeAiPanel" class="close-btn" title="Close">×</button>
             </div>
             <div class="ai-panel-content">
-                <div id="copilot-chat" class="ai-messages"></div>
+                <div id="aiMessages" class="ai-messages"></div>
                 <div class="ai-input-container">
-                    <textarea id="aiInput" placeholder="Ask me anything about your code..." class="ai-input"></textarea>
-                    <button id="sendAiBtn" class="send-btn">Send</button>
+                    <div class="ai-input-wrapper">
+                        <textarea id="aiInput" placeholder="Ask me anything about your code..." class="ai-input"></textarea>
+                        <button id="sendAiBtn" class="send-btn" title="Send message">➤</button>
+                    </div>
                 </div>
             </div>
         </div>
