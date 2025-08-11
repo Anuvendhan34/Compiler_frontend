@@ -44,17 +44,17 @@
             </div>
             <div class="resizer" id="resizer"></div>
             <div class="right-pane">
-                <div class="flex flex-col h-full">
-                    <div class="mb-4 flex-grow flex flex-col">
-                        <label for="input" class="block font-semibold mb-2 text-gray-700 dark:text-gray-200">Input:</label>
-                        <textarea id="input" class="flex-grow" placeholder="Optional input for your program..."></textarea>
+                <div class="io-container">
+                    <div class="io-section">
+                        <label for="input" class="io-label">Input:</label>
+                        <textarea id="input" placeholder="Optional input for your program..."></textarea>
                     </div>
-                    <div class="flex-grow flex flex-col">
-                        <div class="flex items-center gap-2 mb-2">
-                            <label class="block font-semibold text-gray-700 dark:text-gray-200">Output:</label>
+                    <div class="io-section">
+                        <div class="output-header">
+                            <label class="io-label">Output:</label>
                             <div id="spinner" class="hidden"></div>
                         </div>
-                        <pre id="output" class="flex-grow overflow-y-auto"></pre>
+                        <pre id="output"></pre>
                     </div>
                 </div>
             </div>

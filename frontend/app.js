@@ -16,8 +16,15 @@ require(['vs/editor/editor.main'], function () {
         language: 'python',
         theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
         automaticLayout: true,
-        fontSize: 16,
+        fontSize: 14,
         minimap: { enabled: false },
+        lineNumbers: 'on',
+        roundedSelection: false,
+        scrollBeyondLastLine: false,
+        readOnly: false,
+        fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, Consolas, monospace',
+        lineHeight: 20,
+        letterSpacing: 0.5,
     });
 });
 
