@@ -322,28 +322,55 @@ document.getElementById('clearBtn').addEventListener('click', function () {
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 
-// Load theme from localStorage
-const savedTheme = localStorage.getItem('theme');
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-
-function setTheme(dark) {
-    if (dark) {
-        document.documentElement.classList.add('dark');
-        themeIcon.src = 'assets/light.png';
-        if (editor) monaco.editor.setTheme('vs-dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-        themeIcon.src = 'assets/dark.png';
-        if (editor) monaco.editor.setTheme('vs');
-    }
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
+// Enhanced theme management with persistent state
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    setTheme(initialTheme === 'dark');
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches);
+        }
+    });
 }
 
-// Set initial theme
-setTheme(initialTheme === 'dark');
+function setTheme(dark) {
+    const root = document.documentElement;
+    
+    if (dark) {
+        root.classList.add('dark');
+        themeIcon.src = 'assets/light.png';
+        themeIcon.alt = 'Switch to light mode';
+        if (editor) monaco.editor.setTheme('vs-dark');
+    } else {
+        root.classList.remove('dark');
+        themeIcon.src = 'assets/dark.png';
+        themeIcon.alt = 'Switch to dark mode';
+        if (editor) monaco.editor.setTheme('vs');
+    }
+    
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    
+    // Add smooth transition effect
+    root.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    setTimeout(() => {
+        root.style.transition = '';
+    }, 300);
+}
+
 themeToggle.addEventListener('click', () => {
-    setTheme(!document.documentElement.classList.contains('dark'));
+    const isDark = document.documentElement.classList.contains('dark');
+    setTheme(!isDark);
+    
+    // Add click animation
+    themeToggle.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        themeToggle.style.transform = '';
+    }, 150);
 });
 
 // --- Responsive adjustments (Tailwind handles most) ---
@@ -363,6 +390,9 @@ function showOutput(msg) {
 document.addEventListener('DOMContentLoaded', () => {
     aiPanel.style.width = `${aiPanelWidth}px`;
     
+    // Initialize theme
+    initializeTheme();
+    
     // Auto-resize textarea
     const aiInput = document.getElementById('aiInput');
     aiInput.addEventListener('input', function() {
@@ -370,10 +400,15 @@ document.addEventListener('DOMContentLoaded', () => {
         this.style.height = Math.min(this.scrollHeight, 128) + 'px';
     });
     
-    // Add welcome message
+    // Add welcome message with delay for smooth animation
     setTimeout(() => {
-        addMessage('Hello! I\'m your AI coding assistant. I can help you with your code, explain concepts, debug issues, and suggest improvements. What would you like to work on?', 'assistant');
+        addMessage('Hello! I\'m your AI coding assistant. I can help you with your code, explain concepts, debug issues, and suggest improvements. What would you like to work on?', 'assistant', true);
     }, 500);
+    
+    // Add smooth scroll behavior to all scrollable elements
+    document.querySelectorAll('.ai-messages, #output, #input').forEach(element => {
+        element.style.scrollBehavior = 'smooth';
+    });
 });
 
 // --- Fullscreen toggle functionality ---
@@ -381,6 +416,12 @@ const fullscreenToggle = document.getElementById('fullscreenToggle');
 const fullscreenIcon = document.getElementById('fullscreenIcon');
 
 fullscreenToggle.addEventListener('click', () => {
+    // Add click animation
+    fullscreenToggle.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        fullscreenToggle.style.transform = '';
+    }, 150);
+    
     if (!document.fullscreenElement) {
         // Enter fullscreen
         document.documentElement.requestFullscreen().then(() => {
@@ -402,6 +443,9 @@ fullscreenToggle.addEventListener('click', () => {
 
 // Update icon when fullscreen changes (e.g., via F11 or Escape)
 document.addEventListener('fullscreenchange', () => {
+    // Add transition effect
+    fullscreenIcon.style.transition = 'all 0.3s ease';
+    
     if (document.fullscreenElement) {
         fullscreenIcon.src = 'assets/minimize.png';
         fullscreenIcon.alt = 'Exit fullscreen';
@@ -410,3 +454,203 @@ document.addEventListener('fullscreenchange', () => {
         fullscreenIcon.alt = 'Enter fullscreen';
     }
 });
+
+// Enhanced message animation and auto-scroll
+function addMessage(content, type, animate = true) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'ai-message';
+    
+    const messageContainer = document.createElement('div');
+    messageContainer.className = `message-container ${type}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `message-avatar ${type}`;
+    avatar.textContent = type === 'user' ? 'U' : 'AI';
+    
+    const bubble = document.createElement('div');
+    bubble.className = `message-bubble ${type}`;
+    
+    // Enhanced markdown-like formatting for AI responses
+    if (type === 'assistant') {
+        // Convert code blocks with syntax highlighting
+        content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+        // Convert inline code
+        content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Convert line breaks
+        content = content.replace(/\n/g, '<br>');
+        // Convert bold text
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Convert italic text
+        content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        bubble.innerHTML = content;
+    } else {
+        bubble.textContent = content;
+    }
+    
+    messageContainer.appendChild(avatar);
+    messageContainer.appendChild(bubble);
+    messageDiv.appendChild(messageContainer);
+    
+    const aiMessages = document.getElementById('aiMessages');
+    aiMessages.appendChild(messageDiv);
+    
+    // Enhanced smooth scroll with animation delay
+    if (animate) {
+        setTimeout(() => {
+            aiMessages.scrollTo({
+                top: aiMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
+    
+    return messageDiv;
+}
+
+// Enhanced run button with loading animation
+runBtn.addEventListener('click', async function () {
+    // Add loading state
+    runBtn.classList.add('loading');
+    runBtn.innerHTML = '<span class="pulse">⏳</span> Running...';
+    
+    outputEl.textContent = '';
+    outputEl.classList.remove('text-red-400', 'text-green-400');
+    spinner.classList.remove('hidden');
+    
+    const code = editor ? editor.getValue() : '';
+    const language = languageSelector.value;
+    const input = document.getElementById('input').value;
+    
+    try {
+        const res = await fetch('http://127.0.0.1:8000/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, language, input })
+        });
+        const data = await res.json();
+        
+        spinner.classList.add('hidden');
+        runBtn.classList.remove('loading');
+        runBtn.innerHTML = '▶ Run';
+        
+        if (data.error) {
+            showError(data.error || 'Error occurred.');
+        } else {
+            showOutput(data.output || '');
+        }
+    } catch (err) {
+        spinner.classList.add('hidden');
+        runBtn.classList.remove('loading');
+        runBtn.innerHTML = '▶ Run';
+        showError('Network or server error.');
+    }
+});
+
+// Enhanced AI message sending with better UX
+async function sendAiMessage() {
+    const message = aiInput.value.trim();
+    if (!message) return;
+    
+    // Add user message with animation
+    addMessage(message, 'user', true);
+    aiInput.value = '';
+    aiInput.style.height = 'auto';
+    
+    // Show enhanced typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'ai-message';
+    
+    const typingContainer = document.createElement('div');
+    typingContainer.className = 'message-container assistant';
+    
+    const typingAvatar = document.createElement('div');
+    typingAvatar.className = 'message-avatar assistant';
+    typingAvatar.textContent = 'AI';
+    
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = `
+        <span>AI is thinking</span>
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    `;
+    
+    typingContainer.appendChild(typingAvatar);
+    typingContainer.appendChild(typingIndicator);
+    typingDiv.appendChild(typingContainer);
+    
+    const aiMessages = document.getElementById('aiMessages');
+    aiMessages.appendChild(typingDiv);
+    
+    // Smooth scroll to typing indicator
+    setTimeout(() => {
+        aiMessages.scrollTo({
+            top: aiMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
+    
+    // Disable send button with visual feedback
+    sendAiBtn.disabled = true;
+    sendAiBtn.style.opacity = '0.5';
+    sendAiBtn.innerHTML = '⏳';
+    
+    try {
+        // Get current code and language
+        const code = editor ? editor.getValue() : '';
+        const language = languageSelector.value;
+        
+        const response = await fetch('http://127.0.0.1:8000/ai-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                message, 
+                code, 
+                language 
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remove typing indicator with fade out
+        typingDiv.style.opacity = '0';
+        typingDiv.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            if (typingDiv.parentNode) {
+                aiMessages.removeChild(typingDiv);
+            }
+        }, 300);
+        
+        // Add response message
+        setTimeout(() => {
+            if (data.error) {
+                addMessage(`Error: ${data.error}`, 'assistant', true);
+            } else {
+                addMessage(data.message, 'assistant', true);
+            }
+        }, 300);
+        
+    } catch (error) {
+        // Remove typing indicator
+        if (typingDiv.parentNode) {
+            aiMessages.removeChild(typingDiv);
+        }
+        addMessage(`Network error: ${error.message}`, 'assistant', true);
+    }
+    
+    // Re-enable send button
+    sendAiBtn.disabled = false;
+    sendAiBtn.style.opacity = '';
+    sendAiBtn.innerHTML = '➤';
+    
+    // Focus back to input
+    setTimeout(() => {
+        aiInput.focus();
+    }, 100);
+}
+
+// Remove the duplicate addMessage function and sendAiMessage function
+// Keep only the enhanced versions above

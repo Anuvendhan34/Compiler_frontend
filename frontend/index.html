@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ve's Compiler</title>
+    <title>Ve's Compiler - Modern Code Editor</title>
+    <meta name="description" content="A modern, interactive code compiler with AI assistance">
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Monaco Editor CDN -->
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <!-- Preload critical assets -->
+    <link rel="preload" href="assets/dark.png" as="image">
+    <link rel="preload" href="assets/light.png" as="image">
+    <link rel="preload" href="assets/maximize.png" as="image">
+    <link rel="preload" href="assets/minimize.png" as="image">
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors">
+<body>
     <div class="split-container">
         <div class="main-content" id="mainContent">
             <div class="left-pane">
                 <div class="header-container">
-                    <h1 class="header-title">Ve's Compiler</h1>
+                    <h1 class="header-title">Ve's Compiler ⚡</h1>
                     <select id="language" class="language-selector">
                         <option value="python">Python</option>
                         <option value="c">C</option>
@@ -23,17 +29,17 @@
                         <option value="java">Java</option>
                     </select>
                     <div class="controls-group">
-                        <button id="runBtn" class="btn btn-primary">
+                        <button id="runBtn" class="btn btn-primary hover-lift">
                             ▶ Run
                         </button>
-                        <button id="clearBtn" class="btn btn-secondary">Clear Output</button>
-                        <button id="themeToggle" class="btn-icon" title="Toggle dark/light mode">
+                        <button id="clearBtn" class="btn btn-secondary hover-lift">🗑️ Clear</button>
+                        <button id="themeToggle" class="btn-icon hover-scale" title="Toggle dark/light mode">
                             <img id="themeIcon" src="assets/dark.png" alt="Theme" class="w-5 h-5">
                         </button>
-                        <button id="fullscreenToggle" class="btn-icon" title="Toggle fullscreen">
+                        <button id="fullscreenToggle" class="btn-icon hover-scale" title="Toggle fullscreen">
                             <img id="fullscreenIcon" src="assets/maximize.png" alt="Fullscreen" class="w-5 h-5">
                         </button>
-                        <button id="copilotBtn" class="btn-icon" title="Open AI Assistant">
+                        <button id="copilotBtn" class="btn-icon hover-scale" title="Open AI Assistant">
                             <span style="font-size: 1.25rem;">🤖</span>
                         </button>
                     </div>
@@ -44,17 +50,17 @@
             </div>
             <div class="resizer" id="resizer"></div>
             <div class="right-pane">
-                <div class="io-container">
-                    <div class="io-section">
+                <div class="io-container"> 
+                    <div class="io-section hover-lift">
                         <label for="input" class="io-label">Input:</label>
-                        <textarea id="input" placeholder="Optional input for your program..."></textarea>
+                        <textarea id="input" placeholder="Enter input for your program here..." spellcheck="false"></textarea>
                     </div>
-                    <div class="io-section">
+                    <div class="io-section hover-lift">
                         <div class="output-header">
-                            <label class="io-label">Output:</label>
+                            <label class="io-label">📤 Output:</label>
                             <div id="spinner" class="hidden"></div>
                         </div>
-                        <pre id="output"></pre>
+                        <pre id="output" aria-live="polite"></pre>
                     </div>
                 </div>
             </div>
@@ -63,23 +69,39 @@
         <!-- AI Assistant Panel -->
         <div id="aiPanel" class="ai-panel">
             <div class="ai-panel-header">
-                <h3 class="ai-panel-title">
+                <h3 class="ai-panel-title gradient-text">
                     <span>🤖</span>
                     AI Assistant
                 </h3>
-                <button id="closeAiPanel" class="close-btn" title="Close">×</button>
+                <button id="closeAiPanel" class="close-btn" title="Close AI Assistant" aria-label="Close">×</button>
             </div>
             <div class="ai-panel-content">
-                <div id="aiMessages" class="ai-messages"></div>
+                <div id="aiMessages" class="ai-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
                 <div class="ai-input-container">
                     <div class="ai-input-wrapper">
-                        <textarea id="aiInput" placeholder="Ask me anything about your code..." class="ai-input"></textarea>
-                        <button id="sendAiBtn" class="send-btn" title="Send message">➤</button>
+                        <textarea 
+                            id="aiInput" 
+                            placeholder="Ask me anything about your code..." 
+                            class="ai-input"
+                            rows="1"
+                            spellcheck="false"
+                            aria-label="Type your message"
+                        ></textarea>
+                        <button id="sendAiBtn" class="send-btn" title="Send message" aria-label="Send message">➤</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Loading overlay for better UX -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <p>Loading editor...</p>
+        </div>
+    </div>
+    
     <script src="app.js"></script>
 </body>
 </html> 
